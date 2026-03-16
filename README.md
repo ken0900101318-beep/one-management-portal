@@ -72,26 +72,31 @@ ONE桌遊管理系統入口
 - **狀態**: ✅ 已上線
 
 #### 6. 加盟簡報
-- **網址**: https://ken0900101318-beep.github.io/one-franchise-presentation/
-- **功能**: 創業合作方案說明（12頁）
-- **狀態**: ✅ 已上線
-
-#### 7. 商家端 APP
-- **網址**: https://ken0900101318-beep.github.io/one-merchant-app/
-- **功能**: 店家管理系統下載頁面
-- **狀態**: ✅ 已上線
-
-#### 8. 商家端操作說明
-- **網址**: https://ken0900101318-beep.github.io/one-customer-service-training/
-- **功能**: 店家管理系統使用教學
-- **狀態**: ✅ 已上線
-
-#### 9. 用戶端操作說明
 - **網址**: 建置中
-- **功能**: 會員使用教學與常見問題
-- **狀態**: 📋 待建立
+- **功能**: 創業合作方案說明
+- **狀態**: ⚠️ 待確認連結
 
-#### 10. 開店區域查詢
+#### 7. 商家端 APP 下載
+- **網址**: https://ken0900101318-beep.github.io/onegame-app-download/
+- **功能**: 店家管理系統 APP 下載頁面
+- **狀態**: ✅ 已上線
+
+#### 8. 商家端管理教學
+- **網址**: https://ken0900101318-beep.github.io/one-merchant-training/
+- **功能**: 店家管理系統教育訓練
+- **狀態**: ✅ 已上線
+
+#### 9. 總店長管理教學
+- **網址**: https://ken0900101318-beep.github.io/one-customer-service-training/
+- **功能**: 店家管理進階操作說明
+- **狀態**: ✅ 已上線
+
+#### 10. 用戶端功能說明
+- **網址**: https://ken0900101318-beep.github.io/one-user-manual/
+- **功能**: 會員 APP 使用教學與常見問題
+- **狀態**: ✅ 已上線
+
+#### 11. 開店區域查詢
 - **網址**: https://ken0900101318-beep.github.io/one-store-quota/
 - **功能**: 查詢各縣市開店配額與區域限制
 - **狀態**: ✅ 已上線

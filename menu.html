@@ -79,32 +79,40 @@
                     <div class="system-card doc-card" onclick="openSystem('presentation')">
                         <div class="system-icon">📊</div>
                         <h3>加盟簡報</h3>
-                        <p>創業合作方案說明（12頁）</p>
-                        <div class="system-status">🔗 外部連結</div>
+                        <p>創業合作方案說明</p>
+                        <div class="system-status">⚠️ 建置中</div>
                     </div>
 
                     <!-- 商家端下載 -->
                     <div class="system-card doc-card" onclick="openSystem('merchant-app')">
                         <div class="system-icon">📱</div>
-                        <h3>商家端 APP</h3>
-                        <p>店家管理系統下載頁面</p>
-                        <div class="system-status">🔗 外部連結</div>
+                        <h3>商家端 APP 下載</h3>
+                        <p>店家管理系統 APP 下載頁面</p>
+                        <div class="system-status">✅ 運行中</div>
                     </div>
 
-                    <!-- 商家端操作說明 -->
-                    <div class="system-card doc-card" onclick="openSystem('merchant-guide')">
-                        <div class="system-icon">📖</div>
-                        <h3>商家端操作說明</h3>
-                        <p>店家管理系統使用教學</p>
-                        <div class="system-status">🔗 外部連結</div>
+                    <!-- 商家端教育訓練 -->
+                    <div class="system-card doc-card" onclick="openSystem('merchant-training')">
+                        <div class="system-icon">🎓</div>
+                        <h3>商家端管理教學</h3>
+                        <p>店家管理系統教育訓練</p>
+                        <div class="system-status">✅ 運行中</div>
                     </div>
 
-                    <!-- 用戶端操作說明 -->
-                    <div class="system-card doc-card" onclick="openSystem('user-guide')">
-                        <div class="system-icon">📘</div>
-                        <h3>用戶端操作說明</h3>
-                        <p>會員使用教學與常見問題</p>
-                        <div class="system-status">🔗 外部連結</div>
+                    <!-- 總店長管理教學 -->
+                    <div class="system-card doc-card" onclick="openSystem('manager-guide')">
+                        <div class="system-icon">👨‍💼</div>
+                        <h3>總店長管理教學</h3>
+                        <p>店家管理進階操作說明</p>
+                        <div class="system-status">✅ 運行中</div>
+                    </div>
+
+                    <!-- 用戶端功能說明 -->
+                    <div class="system-card doc-card" onclick="openSystem('user-manual')">
+                        <div class="system-icon">📱</div>
+                        <h3>用戶端功能說明</h3>
+                        <p>會員 APP 使用教學與常見問題</p>
+                        <div class="system-status">✅ 運行中</div>
                     </div>
 
                     <!-- 開店區域查詢 -->
@@ -165,17 +173,20 @@
                     window.open('https://home.onegame.tw', '_blank');
                     break;
                 case 'presentation':
-                    window.open('https://ken0900101318-beep.github.io/one-franchise-presentation/', '_blank');
+                    alert('加盟簡報建置中，請聯繫管理員取得最新版本');
+                    // TODO: 確認加盟簡報正確連結
                     break;
                 case 'merchant-app':
-                    window.open('https://ken0900101318-beep.github.io/one-merchant-app/', '_blank');
+                    window.open('https://ken0900101318-beep.github.io/onegame-app-download/', '_blank');
                     break;
-                case 'merchant-guide':
+                case 'merchant-training':
+                    window.open('https://ken0900101318-beep.github.io/one-merchant-training/', '_blank');
+                    break;
+                case 'manager-guide':
                     window.open('https://ken0900101318-beep.github.io/one-customer-service-training/', '_blank');
                     break;
-                case 'user-guide':
-                    alert('用戶端操作說明建置中...');
-                    // TODO: 建立用戶端操作說明頁面
+                case 'user-manual':
+                    window.open('https://ken0900101318-beep.github.io/one-user-manual/', '_blank');
                     break;
                 case 'store-quota':
                     window.open('https://ken0900101318-beep.github.io/one-store-quota/', '_blank');
