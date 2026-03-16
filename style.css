@@ -491,6 +491,15 @@ input[type="range"].progress-slider::-moz-range-thumb {
     box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
 }
 
+/* 文件/資料卡片樣式 */
+.doc-card {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+}
+
+.doc-card:hover {
+    box-shadow: 0 10px 25px rgba(245, 87, 108, 0.3) !important;
+}
+
 .system-icon {
     font-size: 60px;
     margin-bottom: 15px;

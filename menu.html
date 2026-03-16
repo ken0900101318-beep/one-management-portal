@@ -28,6 +28,8 @@
             </div>
 
             <div style="padding: 30px;">
+                <!-- 管理系統區塊 -->
+                <h3 style="margin: 30px 0 20px 0; color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px;">🔧 管理系統</h3>
                 <div class="system-grid">
                     <!-- 加盟報價系統 -->
                     <div class="system-card" onclick="openSystem('quote')">
@@ -59,6 +61,50 @@
                         <h3>員工管理</h3>
                         <p>管理所有系統的使用者帳號</p>
                         <div class="system-status">✅ 運行中</div>
+                    </div>
+                </div>
+
+                <!-- 公司資料區塊 -->
+                <h3 style="margin: 30px 0 20px 0; color: #333; border-bottom: 2px solid #764ba2; padding-bottom: 10px;">📁 公司資料</h3>
+                <div class="system-grid">
+                    <!-- 公司官網 -->
+                    <div class="system-card doc-card" onclick="openSystem('website')">
+                        <div class="system-icon">🌐</div>
+                        <h3>公司官網</h3>
+                        <p>ONE桌遊品牌官網</p>
+                        <div class="system-status">🔗 外部連結</div>
+                    </div>
+
+                    <!-- 加盟簡報 -->
+                    <div class="system-card doc-card" onclick="openSystem('presentation')">
+                        <div class="system-icon">📊</div>
+                        <h3>加盟簡報</h3>
+                        <p>創業合作方案說明（12頁）</p>
+                        <div class="system-status">🔗 外部連結</div>
+                    </div>
+
+                    <!-- 商家端下載 -->
+                    <div class="system-card doc-card" onclick="openSystem('merchant-app')">
+                        <div class="system-icon">📱</div>
+                        <h3>商家端 APP</h3>
+                        <p>店家管理系統下載頁面</p>
+                        <div class="system-status">🔗 外部連結</div>
+                    </div>
+
+                    <!-- 商家端操作說明 -->
+                    <div class="system-card doc-card" onclick="openSystem('merchant-guide')">
+                        <div class="system-icon">📖</div>
+                        <h3>商家端操作說明</h3>
+                        <p>店家管理系統使用教學</p>
+                        <div class="system-status">🔗 外部連結</div>
+                    </div>
+
+                    <!-- 用戶端操作說明 -->
+                    <div class="system-card doc-card" onclick="openSystem('user-guide')">
+                        <div class="system-icon">📘</div>
+                        <h3>用戶端操作說明</h3>
+                        <p>會員使用教學與常見問題</p>
+                        <div class="system-status">🔗 外部連結</div>
                     </div>
                 </div>
             </div>
@@ -106,6 +152,22 @@
                     } else {
                         alert('您沒有權限訪問員工管理！');
                     }
+                    break;
+                case 'website':
+                    window.open('https://ken0900101318-beep.github.io/one-website/', '_blank');
+                    break;
+                case 'presentation':
+                    window.open('https://ken0900101318-beep.github.io/one-franchise-presentation/', '_blank');
+                    break;
+                case 'merchant-app':
+                    window.open('https://ken0900101318-beep.github.io/one-merchant-app/', '_blank');
+                    break;
+                case 'merchant-guide':
+                    window.open('https://ken0900101318-beep.github.io/one-customer-service-training/', '_blank');
+                    break;
+                case 'user-guide':
+                    alert('用戶端操作說明建置中...');
+                    // TODO: 建立用戶端操作說明頁面
                     break;
             }
         }
