@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ONE桌遊管理系統</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-box">
+            <div class="logo">
+                <img src="../one-quote-system/one-logo.jpg" alt="ONE桌遊" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 15px;">
+                <h1>ONE桌遊</h1>
+                <p>管理系統入口</p>
+            </div>
+            
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="username">👤 帳號</label>
+                    <input type="text" id="username" placeholder="請輸入帳號" required autocomplete="username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">🔒 密碼</label>
+                    <input type="password" id="password" placeholder="請輸入密碼" required autocomplete="current-password">
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block">
+                    登入系統
+                </button>
+            </form>
+            
+            <div class="login-footer">
+                <p>© 2026 ONE桌遊 | 版本 v1.0</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script>
+        // 登入處理
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            const users = JSON.parse(localStorage.getItem('oneUsers') || '[]');
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                // 登入成功
+                localStorage.setItem('oneCurrentUser', JSON.stringify(user));
+                window.location.href = 'menu.html';
+            } else {
+                alert('帳號或密碼錯誤，請重試');
+                document.getElementById('password').value = '';
+                document.getElementById('password').focus();
+            }
+        });
+
+        // 檢查是否已登入
+        const currentUser = localStorage.getItem('oneCurrentUser');
+        if (currentUser) {
+            window.location.href = 'menu.html';
+        }
+        
+        // 確保數據已初始化
+        if (typeof initializeData === 'function') {
+            initializeData();
+        }
+    </script>
+</body>
+</html>
