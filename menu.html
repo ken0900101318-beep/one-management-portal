@@ -106,6 +106,14 @@
                         <p>會員使用教學與常見問題</p>
                         <div class="system-status">🔗 外部連結</div>
                     </div>
+
+                    <!-- 開店區域查詢 -->
+                    <div class="system-card doc-card" onclick="openSystem('store-quota')">
+                        <div class="system-icon">🗺️</div>
+                        <h3>開店區域查詢</h3>
+                        <p>查詢各縣市開店配額與區域限制</p>
+                        <div class="system-status">✅ 運行中</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -168,6 +176,9 @@
                 case 'user-guide':
                     alert('用戶端操作說明建置中...');
                     // TODO: 建立用戶端操作說明頁面
+                    break;
+                case 'store-quota':
+                    window.open('https://ken0900101318-beep.github.io/one-store-quota/', '_blank');
                     break;
             }
         }
