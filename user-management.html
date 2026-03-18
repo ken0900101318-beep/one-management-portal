@@ -114,11 +114,17 @@
         let editingUserId = null;
 
         function init() {
+            // 每次都重新從 localStorage 讀取最新資料
             users = JSON.parse(localStorage.getItem('oneUsers') || '[]');
+            console.log('初始化：載入使用者列表', users);
             loadUsers();
         }
 
         function loadUsers() {
+            // 確保使用最新資料
+            users = JSON.parse(localStorage.getItem('oneUsers') || '[]');
+            console.log('重新載入使用者列表', users);
+            
             const usersBody = document.getElementById('usersBody');
             
             if (users.length === 0) {
@@ -153,9 +159,18 @@
         }
 
         function editUser(userId) {
+            // 重新載入最新資料
+            users = JSON.parse(localStorage.getItem('oneUsers') || '[]');
+            
             const user = users.find(u => u.id === userId);
-            if (!user) return;
+            if (!user) {
+                alert('找不到該員工！');
+                console.error('找不到員工 ID:', userId);
+                return;
+            }
 
+            console.log('編輯員工：', user);
+            
             editingUserId = userId;
             document.getElementById('modalTitle').textContent = '編輯員工';
             document.getElementById('userAvatar').value = user.avatar;
@@ -164,6 +179,10 @@
             document.getElementById('userPassword').value = '';
             document.getElementById('userPassword').required = false;
             document.getElementById('userRole').value = user.role;
+            
+            // 驗證下拉選單是否正確設定
+            console.log('當前權限下拉選單值:', document.getElementById('userRole').value);
+            
             document.getElementById('userModal').classList.add('show');
         }
 
@@ -180,8 +199,19 @@
             const password = document.getElementById('userPassword').value;
             const role = document.getElementById('userRole').value;
 
+            console.log('準備儲存：', {
+                avatar, name, username, 
+                password: password ? '***已設定***' : '(未變更)',
+                role,
+                editingUserId
+            });
+
             if (!avatar || !name || !username || !role) {
-                alert('請填寫所有必填欄位！');
+                alert('請填寫所有必填欄位！\n\n' +
+                      `頭像：${avatar || '❌'}\n` +
+                      `姓名：${name || '❌'}\n` +
+                      `帳號：${username || '❌'}\n` +
+                      `權限：${role || '❌'}`);
                 return;
             }
 
