@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>員工管理 - ONE桌遊</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <img src="../one-quote-system/one-logo.jpg" alt="ONE桌遊" style="width: 35px; height: 35px; border-radius: 50%; vertical-align: middle; margin-right: 10px;">
+            ONE桌遊管理系統
+        </div>
+        <div class="navbar-user">
+            <button class="btn-logout" onclick="location.href='menu.html'">← 返回選單</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2>👥 員工管理</h2>
+                <button class="btn btn-primary" onclick="showAddModal()">➕ 新增員工</button>
+            </div>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>姓名</th>
+                        <th>帳號</th>
+                        <th>權限</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="userList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 對話框 -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">新增員工</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <label>姓名 *</label>
+                    <input type="text" id="inputName" required>
+                </div>
+                <div class="form-row">
+                    <label>帳號 *</label>
+                    <input type="text" id="inputUsername" required>
+                </div>
+                <div class="form-row">
+                    <label>密碼 *</label>
+                    <input type="password" id="inputPassword" required>
+                    <small>編輯時留空表示不修改</small>
+                </div>
+                <div class="form-row">
+                    <label>權限 *</label>
+                    <select id="inputRole" required>
+                        <option value="admin">主管</option>
+                        <option value="staff">員工</option>
+                        <option value="viewer">會計（查看）</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveUser()">儲存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'https://script.google.com/macros/s/AKfycbz00HGH3_TaJ7CITqVg-R-qCfvYRBJEns-3IovcpGG9cbj1Kb5EuQ4QEDKfts0Rt4QC/exec';
+        const roleNames = { 'admin': '主管', 'staff': '員工', 'viewer': '會計' };
+        
+        let users = [];
+        let editingId = null;
+
+        // 載入員工列表
+        async function loadUsers() {
+            try {
+                const url = `${API}?action=getUsers&_t=${Date.now()}`;
+                const res = await fetch(url);
+                const data = await res.json();
+                
+                if (data.success) {
+                    users = data.users;
+                    renderUsers();
+                }
+            } catch (error) {
+                alert('載入失敗：' + error.message);
+            }
+        }
+
+        // 顯示員工列表
+        function renderUsers() {
+            const tbody = document.getElementById('userList');
+            tbody.innerHTML = users.map(u => `
+                <tr>
+                    <td>${u.name}</td>
+                    <td>${u.username}</td>
+                    <td><span class="status-badge">${roleNames[u.role]}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary" onclick="editUser('${u.id}')">編輯</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteUser('${u.id}')">刪除</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 顯示新增對話框
+        function showAddModal() {
+            editingId = null;
+            document.getElementById('modalTitle').textContent = '新增員工';
+            document.getElementById('inputName').value = '';
+            document.getElementById('inputUsername').value = '';
+            document.getElementById('inputPassword').value = '';
+            document.getElementById('inputPassword').required = true;
+            document.getElementById('inputRole').value = 'staff';
+            document.getElementById('modal').classList.add('show');
+        }
+
+        // 編輯員工
+        function editUser(id) {
+            const user = users.find(u => u.id === id);
+            if (!user) return;
+            
+            editingId = id;
+            document.getElementById('modalTitle').textContent = '編輯員工';
+            document.getElementById('inputName').value = user.name;
+            document.getElementById('inputUsername').value = user.username;
+            document.getElementById('inputPassword').value = '';
+            document.getElementById('inputPassword').required = false;
+            document.getElementById('inputRole').value = user.role;
+            document.getElementById('modal').classList.add('show');
+        }
+
+        // 關閉對話框
+        function closeModal() {
+            document.getElementById('modal').classList.remove('show');
+            editingId = null;
+        }
+
+        // 儲存員工
+        async function saveUser() {
+            const name = document.getElementById('inputName').value.trim();
+            const username = document.getElementById('inputUsername').value.trim();
+            const password = document.getElementById('inputPassword').value;
+            const role = document.getElementById('inputRole').value;
+
+            if (!name || !username || !role) {
+                alert('請填寫所有必填欄位！');
+                return;
+            }
+
+            if (!editingId && !password) {
+                alert('新增員工時密碼為必填！');
+                return;
+            }
+
+            try {
+                const userData = JSON.stringify({ name, username, password, role });
+                let url;
+                
+                if (editingId) {
+                    url = `${API}?action=updateUser&userId=${editingId}&user=${encodeURIComponent(userData)}&_t=${Date.now()}`;
+                } else {
+                    url = `${API}?action=addUser&user=${encodeURIComponent(userData)}&_t=${Date.now()}`;
+                }
+
+                const res = await fetch(url);
+                const result = await res.json();
+
+                if (result.success) {
+                    alert('✅ ' + result.message);
+                    closeModal();
+                    setTimeout(loadUsers, 2000); // 等2秒後重新載入
+                } else {
+                    alert('❌ ' + result.error);
+                }
+            } catch (error) {
+                alert('❌ 連線失敗：' + error.message);
+            }
+        }
+
+        // 刪除員工
+        async function deleteUser(id) {
+            const user = users.find(u => u.id === id);
+            if (!user || !confirm(`確定要刪除「${user.name}」嗎？`)) return;
+
+            try {
+                const url = `${API}?action=deleteUser&userId=${id}&_t=${Date.now()}`;
+                const res = await fetch(url);
+                const result = await res.json();
+
+                if (result.success) {
+                    alert('✅ ' + result.message);
+                    setTimeout(loadUsers, 2000);
+                } else {
+                    alert('❌ ' + result.error);
+                }
+            } catch (error) {
+                alert('❌ 連線失敗：' + error.message);
+            }
+        }
+
+        // 頁面載入時執行
+        loadUsers();
+    </script>
+</body>
+</html>
