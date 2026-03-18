@@ -207,8 +207,15 @@
             if (editingUserId) {
                 // 編輯模式
                 const userIndex = users.findIndex(u => u.id === editingUserId);
-                if (userIndex === -1) return;
+                if (userIndex === -1) {
+                    alert('❌ 找不到該員工！');
+                    return;
+                }
 
+                // 記錄修改前的資料
+                const oldUser = JSON.parse(JSON.stringify(users[userIndex]));
+                
+                // 更新員工資料
                 users[userIndex].avatar = avatar;
                 users[userIndex].name = name;
                 users[userIndex].username = username;
@@ -217,13 +224,17 @@
                 }
                 users[userIndex].role = role;
 
-                // 如果修改的是當前登入用戶，更新登入狀態
-                if (editingUserId === currentUser.id) {
-                    const updatedUser = users[userIndex];
-                    localStorage.setItem('oneCurrentUser', JSON.stringify(updatedUser));
-                }
+                // 詳細的修改紀錄
+                console.log('員工資料修改：', {
+                    修改前: oldUser,
+                    修改後: users[userIndex]
+                });
 
-                alert('✅ 員工資料已更新');
+                alert('✅ 員工資料已更新\n\n' + 
+                      `姓名：${name}\n` +
+                      `帳號：${username}\n` +
+                      `權限：${roleNames[role]}\n` +
+                      (password ? '✅ 密碼已更新' : '⚠️ 密碼未變更'));
             } else {
                 // 新增模式
                 const newUser = {
@@ -240,28 +251,47 @@
             }
 
             // 儲存到 localStorage
-            localStorage.setItem('oneUsers', JSON.stringify(users));
-            
-            // 同步到報價系統（確保兩邊一致）
-            localStorage.setItem('users', JSON.stringify(users));
-            
-            // 如果修改的是當前登入用戶，強制更新登入狀態
-            if (editingUserId === currentUser.id) {
-                const updatedUser = users.find(u => u.id === editingUserId);
-                if (updatedUser) {
-                    localStorage.setItem('oneCurrentUser', JSON.stringify(updatedUser));
-                    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+            try {
+                localStorage.setItem('oneUsers', JSON.stringify(users));
+                console.log('✅ oneUsers 已儲存', users);
+                
+                // 同步到報價系統（確保兩邊一致）
+                localStorage.setItem('users', JSON.stringify(users));
+                console.log('✅ users 已同步');
+                
+                // 如果修改的是當前登入用戶，強制更新登入狀態
+                if (editingUserId === currentUser.id) {
+                    const updatedUser = users.find(u => u.id === editingUserId);
+                    if (updatedUser) {
+                        localStorage.setItem('oneCurrentUser', JSON.stringify(updatedUser));
+                        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+                        console.log('✅ 當前用戶狀態已更新', updatedUser);
+                    }
                 }
+                
+                // 驗證儲存是否成功
+                const savedUsers = JSON.parse(localStorage.getItem('oneUsers'));
+                const savedUser = savedUsers.find(u => u.id === editingUserId || u.username === username);
+                
+                if (!savedUser) {
+                    throw new Error('驗證失敗：找不到儲存的使用者');
+                }
+                
+                console.log('✅ 驗證成功：資料已正確儲存', savedUser);
+                
+            } catch (error) {
+                alert('❌ 儲存失敗：' + error.message);
+                console.error('儲存錯誤：', error);
+                return;
             }
             
             closeUserModal();
             loadUsers();
             
-            alert('✅ 儲存成功！新密碼已生效。');
-            
-            // 如果修改了當前用戶密碼，重新載入頁面
-            if (editingUserId === currentUser.id && password) {
+            // 如果修改了當前用戶，重新載入頁面以更新權限
+            if (editingUserId === currentUser.id) {
                 setTimeout(() => {
+                    alert('✅ 您的資料已更新，頁面即將重新載入');
                     location.reload();
                 }, 500);
             }

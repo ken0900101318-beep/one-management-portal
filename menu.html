@@ -138,9 +138,19 @@
     <script src="data.js"></script>
     <script>
         // 檢查登入狀態
-        const currentUser = JSON.parse(localStorage.getItem('oneCurrentUser'));
+        let currentUser = JSON.parse(localStorage.getItem('oneCurrentUser'));
         if (!currentUser) {
             window.location.href = 'index.html';
+        }
+
+        // 從使用者列表重新驗證（避免快取問題）
+        const users = JSON.parse(localStorage.getItem('oneUsers') || '[]');
+        const freshUser = users.find(u => u.id === currentUser.id);
+        if (freshUser) {
+            // 使用最新的使用者資料
+            currentUser = freshUser;
+            localStorage.setItem('oneCurrentUser', JSON.stringify(freshUser));
+            console.log('✅ 使用最新使用者資料', freshUser);
         }
 
         // 顯示使用者資訊
@@ -154,7 +164,10 @@
 
         // 權限控制
         if (currentUser.role !== 'admin') {
-            document.getElementById('userManagementCard').style.display = 'none';
+            const userManagementCard = document.getElementById('userManagementCard');
+            if (userManagementCard) {
+                userManagementCard.style.display = 'none';
+            }
         }
 
         function openSystem(system) {
