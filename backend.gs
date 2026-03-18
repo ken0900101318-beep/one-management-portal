@@ -34,7 +34,7 @@ function initializeSheet() {
 }
 
 /**
- * 處理 API 請求
+ * 處理 API 請求（POST）
  */
 function doPost(e) {
   try {
@@ -62,6 +62,7 @@ function doPost(e) {
         result = { success: false, error: '未知操作' };
     }
     
+    // 允許 CORS
     return ContentService
       .createTextOutput(JSON.stringify(result))
       .setMimeType(ContentService.MimeType.JSON);
@@ -77,7 +78,7 @@ function doPost(e) {
 }
 
 /**
- * 處理 GET 請求（用於測試）
+ * 處理 GET 請求（用於測試 + 讀取操作）
  */
 function doGet(e) {
   const action = e.parameter.action || 'test';
@@ -92,6 +93,41 @@ function doGet(e) {
       .setMimeType(ContentService.MimeType.JSON);
   }
   
+  // 登入驗證（支援 GET，方便前端 CORS）
+  if (action === 'login') {
+    const result = handleLogin(e.parameter.username, e.parameter.password);
+    return ContentService
+      .createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  // 新增員工
+  if (action === 'addUser' && e.parameter.user) {
+    const user = JSON.parse(e.parameter.user);
+    const result = handleAddUser(user);
+    return ContentService
+      .createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  // 更新員工
+  if (action === 'updateUser' && e.parameter.userId && e.parameter.user) {
+    const user = JSON.parse(e.parameter.user);
+    const result = handleUpdateUser(e.parameter.userId, user);
+    return ContentService
+      .createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  // 刪除員工
+  if (action === 'deleteUser' && e.parameter.userId) {
+    const result = handleDeleteUser(e.parameter.userId);
+    return ContentService
+      .createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  // 取得員工列表
   if (action === 'getUsers') {
     const result = handleGetUsers();
     return ContentService
@@ -102,7 +138,7 @@ function doGet(e) {
   return ContentService
     .createTextOutput(JSON.stringify({
       success: false,
-      error: '請使用 POST 請求'
+      error: '不支援的操作'
     }))
     .setMimeType(ContentService.MimeType.JSON);
 }

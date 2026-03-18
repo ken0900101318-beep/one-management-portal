@@ -5,32 +5,55 @@
 
 const API = {
     /**
-     * 發送請求到後端
+     * 發送請求到後端（使用 GET 避免 CORS）
      */
     async request(action, data = {}) {
         try {
-            const response = await fetch(API_CONFIG.endpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    action: action,
-                    ...data
-                })
+            // 建立查詢參數
+            const params = new URLSearchParams({
+                action: action,
+                ...this.flattenData(data)
             });
             
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
+            const url = `${API_CONFIG.endpoint}?${params.toString()}`;
+            console.log('API 請求:', action, data);
             
-            const result = await response.json();
-            return result;
+            const response = await fetch(url, {
+                method: 'GET',
+                redirect: 'follow'
+            });
+            
+            const text = await response.text();
+            
+            try {
+                const result = JSON.parse(text);
+                console.log('API 回應:', result);
+                return result;
+            } catch (e) {
+                console.error('無法解析回應:', text);
+                throw new Error('API 回應格式錯誤');
+            }
             
         } catch (error) {
             console.error('API 請求失敗:', error);
             throw error;
         }
+    },
+    
+    /**
+     * 扁平化資料（將物件轉為查詢參數）
+     */
+    flattenData(data) {
+        const flat = {};
+        for (const key in data) {
+            if (typeof data[key] === 'object' && data[key] !== null) {
+                // 物件轉 JSON 字串
+                flat[key] = JSON.stringify(data[key]);
+            } else {
+                flat[key] = data[key];
+            }
+        }
+        return flat;
     },
     
     /**
