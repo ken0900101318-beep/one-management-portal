@@ -90,7 +90,8 @@
         </div>
     </div>
 
-    <script src="data.js"></script>
+    <script src="config.js"></script>
+    <script src="api.js"></script>
     <script>
         // 檢查登入狀態
         const currentUser = JSON.parse(localStorage.getItem('oneCurrentUser'));
@@ -98,9 +99,9 @@
             window.location.href = 'index.html';
         }
 
-        // 只有主管能進入
+        // 權限控制：只有主管可以管理員工
         if (currentUser.role !== 'admin') {
-            alert('您沒有權限訪問此頁面！');
+            alert('⚠️ 您沒有權限訪問此頁面\n\n此功能僅限主管使用。');
             window.location.href = 'menu.html';
         }
 
@@ -116,29 +117,25 @@
         let users = [];
         let editingUserId = null;
 
-        function init() {
-            // 每次都重新從 localStorage 讀取最新資料
-            users = JSON.parse(localStorage.getItem('oneUsers') || '[]');
-            console.log('初始化：載入使用者列表', users);
-            loadUsers();
+        async function init() {
+            console.log('初始化：載入員工資料...');
+            await loadUsers();
         }
 
-        function loadUsers() {
-            // 確保使用最新資料
-            users = JSON.parse(localStorage.getItem('oneUsers') || '[]');
-            console.log('重新載入使用者列表', users);
-            
-            const usersBody = document.getElementById('usersBody');
-            
-            if (users.length === 0) {
-                usersBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">暫無員工資料</td></tr>';
-                return;
-            }
-
-            usersBody.innerHTML = users.map(user => `
+        async function loadUsers() {
+            try {
+                console.log('🔄 從雲端讀取員工資料...');
+                const result = await API.getUsers();
+                
+                if (result.success) {
+                    users = result.users;
+                    console.log('✅ 載入成功:', users.length, '位員工');
+                    
+                    const usersBody = document.getElementById('usersBody');
+                    usersBody.innerHTML = users.map(user => `
                 <tr>
-                    <td style="font-size: 2em;">${user.avatar}</td>
-                    <td><strong>${user.name}</strong></td>
+                    <td>${user.avatar}</td>
+                    <td>${user.name}</td>
                     <td>${user.username}</td>
                     <td>
                         <span class="status-badge ${user.role === 'admin' ? 'status-signed' : user.role === 'staff' ? 'status-construction' : 'status-quoted'}">
@@ -151,6 +148,13 @@
                     </td>
                 </tr>
             `).join('');
+                } else {
+                    alert('❌ 載入失敗：' + (result.error || '未知錯誤'));
+                }
+            } catch (error) {
+                console.error('載入員工資料失敗:', error);
+                alert('❌ 連線失敗：' + error.message);
+            }
         }
 
         function openAddUserModal() {
@@ -162,13 +166,9 @@
         }
 
         function editUser(userId) {
-            // 重新載入最新資料
-            users = JSON.parse(localStorage.getItem('oneUsers') || '[]');
-            
             const user = users.find(u => u.id === userId);
             if (!user) {
                 alert('找不到該員工！');
-                console.error('找不到員工 ID:', userId);
                 return;
             }
 
@@ -183,22 +183,6 @@
             document.getElementById('userPassword').required = false;
             document.getElementById('userRole').value = user.role;
             
-            // 更新權限顯示
-            const roleNames = {
-                'admin': '主管',
-                'staff': '員工',
-                'viewer': '會計（查看）'
-            };
-            
-            const currentRoleDisplay = document.getElementById('currentRoleDisplay');
-            if (currentRoleDisplay) {
-                currentRoleDisplay.textContent = roleNames[user.role] || user.role;
-            }
-            
-            // 驗證下拉選單是否正確設定
-            const roleSelect = document.getElementById('userRole');
-            console.log('當前權限下拉選單值:', roleSelect ? roleSelect.value : '找不到元素');
-            
             document.getElementById('userModal').classList.add('show');
         }
 
@@ -208,41 +192,17 @@
             editingUserId = null;
         }
 
-        function saveUser() {
-            const roleSelect = document.getElementById('userRole');
-            
-            // 強制檢查下拉選單
-            console.log('🔍 下拉選單檢查：');
-            console.log('  元素:', roleSelect);
-            console.log('  選中的選項 index:', roleSelect.selectedIndex);
-            console.log('  選中的選項:', roleSelect.options[roleSelect.selectedIndex]);
-            console.log('  選中的值:', roleSelect.value);
-            console.log('  所有選項:', Array.from(roleSelect.options).map((o, i) => ({
-                index: i,
-                value: o.value,
-                text: o.text,
-                selected: o.selected
-            })));
-            
+        async function saveUser() {
             const avatar = document.getElementById('userAvatar').value.trim();
             const name = document.getElementById('userName').value.trim();
             const username = document.getElementById('userUsername').value.trim();
             const password = document.getElementById('userPassword').value;
-            const role = roleSelect.value;
+            const role = document.getElementById('userRole').value;
 
-            console.log('準備儲存：', {
-                avatar, name, username, 
-                password: password ? '***已設定***' : '(未變更)',
-                role,
-                editingUserId
-            });
+            console.log('準備儲存：', {avatar, name, username, role, password: password ? '***已設定***' : '(未變更)', editingUserId});
 
             if (!avatar || !name || !username || !role) {
-                alert('請填寫所有必填欄位！\n\n' +
-                      `頭像：${avatar || '❌'}\n` +
-                      `姓名：${name || '❌'}\n` +
-                      `帳號：${username || '❌'}\n` +
-                      `權限：${role || '❌'}`);
+                alert('請填寫所有必填欄位！');
                 return;
             }
 
@@ -256,121 +216,51 @@
                 return;
             }
 
-            // 檢查帳號是否重複
-            const duplicateUser = users.find(u => 
-                u.username === username && u.id !== editingUserId
-            );
-            if (duplicateUser) {
-                alert('此帳號已存在！');
-                return;
-            }
-
-            if (editingUserId) {
-                // 編輯模式
-                const userIndex = users.findIndex(u => u.id === editingUserId);
-                if (userIndex === -1) {
-                    alert('❌ 找不到該員工！');
-                    return;
-                }
-
-                // 記錄修改前的資料
-                const oldUser = JSON.parse(JSON.stringify(users[userIndex]));
-                
-                console.log('🔧 開始更新員工資料...');
-                console.log('  更新前:', oldUser);
-                console.log('  新的值:', {avatar, name, username, role, password: password ? '***' : '(不變)'});
-                
-                // ⚠️ 使用完全替換的方式（而不是修改屬性）
-                const updatedUser = {
-                    id: users[userIndex].id,
-                    avatar: avatar,
-                    name: name,
-                    username: username,
-                    password: password || users[userIndex].password,
-                    role: role
-                };
-                
-                console.log('  建立的新物件:', updatedUser);
-                
-                // 替換陣列中的物件
-                users[userIndex] = updatedUser;
-                
-                console.log('  替換後的 users[userIndex]:', users[userIndex]);
-
-                // 詳細的修改紀錄
-                console.log('員工資料修改：', {
-                    修改前: oldUser,
-                    修改後: users[userIndex]
-                });
-
-                alert('✅ 員工資料已更新\n\n' + 
-                      `姓名：${name}\n` +
-                      `帳號：${username}\n` +
-                      `權限：${roleNames[role]}\n` +
-                      (password ? '✅ 密碼已更新' : '⚠️ 密碼未變更'));
-            } else {
-                // 新增模式
-                const newUser = {
-                    id: 'USR-' + Date.now(),
-                    avatar: avatar,
-                    name: name,
-                    username: username,
-                    password: password,
-                    role: role
-                };
-
-                users.push(newUser);
-                alert('✅ 員工已新增');
-            }
-
-            // 儲存到 localStorage
+            // 儲存到雲端
             try {
-                localStorage.setItem('oneUsers', JSON.stringify(users));
-                console.log('✅ oneUsers 已儲存', users);
+                let result;
                 
-                // 同步到報價系統（確保兩邊一致）
-                localStorage.setItem('users', JSON.stringify(users));
-                console.log('✅ users 已同步');
+                if (editingUserId) {
+                    // 編輯模式
+                    console.log('🔧 更新員工資料:', editingUserId);
+                    result = await API.updateUser(editingUserId, {
+                        avatar, name, username, password, role
+                    });
+                } else {
+                    // 新增模式
+                    console.log('➕ 新增員工');
+                    result = await API.addUser({
+                        avatar, name, username, password, role
+                    });
+                }
                 
-                // 如果修改的是當前登入用戶，強制更新登入狀態
-                if (editingUserId === currentUser.id) {
-                    const updatedUser = users.find(u => u.id === editingUserId);
-                    if (updatedUser) {
-                        localStorage.setItem('oneCurrentUser', JSON.stringify(updatedUser));
-                        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-                        console.log('✅ 當前用戶狀態已更新', updatedUser);
+                if (result.success) {
+                    alert('✅ ' + result.message + '\n\n' + 
+                          `姓名：${name}\n` +
+                          `帳號：${username}\n` +
+                          `權限：${roleNames[role]}\n` +
+                          (password ? '✅ 密碼已設定' : '⚠️ 密碼未變更'));
+                    
+                    closeUserModal();
+                    await loadUsers();
+                    
+                    // 如果修改了當前用戶，重新載入頁面
+                    if (editingUserId === currentUser.id) {
+                        setTimeout(() => {
+                            alert('✅ 您的資料已更新，頁面即將重新載入');
+                            location.reload();
+                        }, 500);
                     }
+                } else {
+                    alert('❌ ' + (result.error || '儲存失敗'));
                 }
-                
-                // 驗證儲存是否成功
-                const savedUsers = JSON.parse(localStorage.getItem('oneUsers'));
-                const savedUser = savedUsers.find(u => u.id === editingUserId || u.username === username);
-                
-                if (!savedUser) {
-                    throw new Error('驗證失敗：找不到儲存的使用者');
-                }
-                
-                console.log('✅ 驗證成功：資料已正確儲存', savedUser);
-                
             } catch (error) {
-                alert('❌ 儲存失敗：' + error.message);
-                console.error('儲存錯誤：', error);
-                return;
-            }
-            
-            closeUserModal();
-            loadUsers();
-            
-            // 如果修改了當前用戶，重新載入頁面以更新權限
-            if (editingUserId === currentUser.id) {
-                setTimeout(() => {
-                    alert('✅ 您的資料已更新，頁面即將重新載入');
-                    location.reload();
-                }, 500);
+                console.error('儲存失敗:', error);
+                alert('❌ 連線失敗：' + error.message);
             }
         }
 
-        function deleteUser(userId) {
+        async function deleteUser(userId) {
             if (userId === currentUser.id) {
                 alert('無法刪除自己的帳號！');
                 return;
@@ -379,18 +269,24 @@
             const user = users.find(u => u.id === userId);
             if (!user) return;
 
-            if (!confirm(`確定要刪除員工「${user.name}」嗎？`)) {
+            if (!confirm(`確定要刪除員工「${user.name}」嗎？\n\n此操作無法復原！`)) {
                 return;
             }
 
-            users = users.filter(u => u.id !== userId);
-            localStorage.setItem('oneUsers', JSON.stringify(users));
-            
-            // 同步到報價系統
-            localStorage.setItem('users', JSON.stringify(users));
-            
-            alert('✅ 員工已刪除');
-            loadUsers();
+            try {
+                console.log('🗑️ 刪除員工:', userId);
+                const result = await API.deleteUser(userId);
+                
+                if (result.success) {
+                    alert('✅ ' + result.message);
+                    await loadUsers();
+                } else {
+                    alert('❌ ' + (result.error || '刪除失敗'));
+                }
+            } catch (error) {
+                console.error('刪除失敗:', error);
+                alert('❌ 連線失敗：' + error.message);
+            }
         }
 
         init();
