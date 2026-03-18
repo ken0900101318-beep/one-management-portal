@@ -261,6 +261,10 @@
                 // 記錄修改前的資料
                 const oldUser = JSON.parse(JSON.stringify(users[userIndex]));
                 
+                console.log('🔧 開始更新員工資料...');
+                console.log('  更新前的 role:', users[userIndex].role);
+                console.log('  新的 role 值:', role);
+                
                 // 更新員工資料
                 users[userIndex].avatar = avatar;
                 users[userIndex].name = name;
@@ -269,11 +273,14 @@
                     users[userIndex].password = password;
                 }
                 users[userIndex].role = role;
+                
+                console.log('  更新後的 role:', users[userIndex].role);
+                console.log('  users[userIndex] 完整內容:', JSON.parse(JSON.stringify(users[userIndex])));
 
                 // 詳細的修改紀錄
                 console.log('員工資料修改：', {
                     修改前: oldUser,
-                    修改後: users[userIndex]
+                    修改後: JSON.parse(JSON.stringify(users[userIndex]))
                 });
 
                 alert('✅ 員工資料已更新\n\n' + 
