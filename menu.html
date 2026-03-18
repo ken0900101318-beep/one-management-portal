@@ -122,6 +122,14 @@
                         <p>查詢各縣市開店配額與區域限制</p>
                         <div class="system-status">✅ 運行中</div>
                     </div>
+
+                    <!-- AI 選址系統 -->
+                    <div class="system-card doc-card" onclick="openSystem('location-finder')">
+                        <div class="system-icon">🎯</div>
+                        <h3>AI 選址系統</h3>
+                        <p>智能評估店址適合度（學校、人流、交通）</p>
+                        <div class="system-status">✅ 運行中</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -189,6 +197,9 @@
                     break;
                 case 'store-quota':
                     window.open('https://ken0900101318-beep.github.io/one-store-quota/', '_blank');
+                    break;
+                case 'location-finder':
+                    window.open('https://ken0900101318-beep.github.io/one-location-finder/', '_blank');
                     break;
             }
         }
