@@ -3,8 +3,8 @@
  * Google Apps Script 後端
  */
 
-// 請替換為你的 Google Sheets ID
-const SHEET_ID = '請填入 Google Sheets ID';
+// Google Sheets ID
+const SHEET_ID = '1VAn00P6UwTd95cC-UCtQcJcHLIFhSzC9b_2q-hHE_NQ';
 const SHEET_NAME = '員工資料';
 
 /**
