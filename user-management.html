@@ -58,7 +58,7 @@
                     </div>
                     <div class="form-row">
                         <label>姓名 *</label>
-                        <input type="text" id="userName" required placeholder="例如：阿建">
+                        <input type="text" id="userFormName" required placeholder="例如：阿建">
                     </div>
                     <div class="form-row">
                         <label>帳號（登入用）*</label>
@@ -177,7 +177,7 @@
             editingUserId = userId;
             document.getElementById('modalTitle').textContent = '編輯員工';
             document.getElementById('userAvatar').value = user.avatar;
-            document.getElementById('userName').value = user.name;
+            document.getElementById('userFormName').value = user.name;
             document.getElementById('userUsername').value = user.username;
             document.getElementById('userPassword').value = '';
             document.getElementById('userPassword').required = false;
@@ -194,7 +194,7 @@
 
         async function saveUser() {
             const avatar = document.getElementById('userAvatar').value.trim();
-            const name = document.getElementById('userName').value.trim();
+            const name = document.getElementById('userFormName').value.trim();
             const username = document.getElementById('userUsername').value.trim();
             const password = document.getElementById('userPassword').value;
             const role = document.getElementById('userRole').value;
