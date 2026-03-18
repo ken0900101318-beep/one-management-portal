@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>員工管理 - ONE桌遊管理系統</title>
+    <title>員工管理 - ONE桌遊</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,10 +13,6 @@
             ONE桌遊管理系統
         </div>
         <div class="navbar-user">
-            <div class="user-info">
-                <div class="user-name" id="userName">載入中...</div>
-                <div class="user-role" id="userRole">-</div>
-            </div>
             <button class="btn-logout" onclick="location.href='menu.html'">← 返回選單</button>
         </div>
     </nav>
@@ -24,296 +20,198 @@
     <div class="container">
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title">👥 員工管理</h2>
-                <button class="btn btn-primary" onclick="openAddUserModal()">➕ 新增員工</button>
+                <h2>👥 員工管理</h2>
+                <button class="btn btn-primary" onclick="showAddModal()">➕ 新增員工</button>
             </div>
 
             <table class="table">
                 <thead>
                     <tr>
-                        <th>頭像</th>
                         <th>姓名</th>
                         <th>帳號</th>
                         <th>權限</th>
                         <th>操作</th>
                     </tr>
                 </thead>
-                <tbody id="usersBody"></tbody>
+                <tbody id="userList"></tbody>
             </table>
         </div>
     </div>
 
-    <!-- 新增/編輯員工 Modal -->
-    <div class="modal" id="userModal">
+    <!-- 對話框 -->
+    <div id="modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modalTitle">新增員工</h3>
-                <span class="modal-close" onclick="closeUserModal()">×</span>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <form id="userForm">
-                    <div class="form-row">
-                        <label>頭像 Emoji（選填）</label>
-                        <input type="text" id="userAvatar" placeholder="例如：👨‍💼" maxlength="10">
-                    </div>
-                    <div class="form-row">
-                        <label>姓名 *</label>
-                        <input type="text" id="userFormName" required placeholder="例如：阿建">
-                    </div>
-                    <div class="form-row">
-                        <label>帳號（登入用）*</label>
-                        <input type="text" id="userUsername" required placeholder="例如：admin">
-                    </div>
-                    <div class="form-row">
-                        <label>密碼 *</label>
-                        <input type="password" id="userPassword" required placeholder="至少 6 位數">
-                        <small style="color: #666;">編輯時留空表示不修改密碼</small>
-                    </div>
-                    <div class="form-row">
-                        <label>權限 *</label>
-                        <select id="userRole" required onchange="console.log('權限已變更為:', this.value)">
-                            <option value="">請選擇...</option>
-                            <option value="admin">主管（可管理所有功能）</option>
-                            <option value="staff">員工（可新增編輯專案）</option>
-                            <option value="viewer">會計（僅查看）</option>
-                        </select>
-                        <small style="color: #666; display: block; margin-top: 5px;">
-                            目前選擇：<span id="currentRoleDisplay">-</span>
-                        </small>
-                    </div>
-                </form>
+                <div class="form-row">
+                    <label>姓名 *</label>
+                    <input type="text" id="inputName" required>
+                </div>
+                <div class="form-row">
+                    <label>帳號 *</label>
+                    <input type="text" id="inputUsername" required>
+                </div>
+                <div class="form-row">
+                    <label>密碼 *</label>
+                    <input type="password" id="inputPassword" required>
+                    <small>編輯時留空表示不修改</small>
+                </div>
+                <div class="form-row">
+                    <label>權限 *</label>
+                    <select id="inputRole" required>
+                        <option value="admin">主管</option>
+                        <option value="staff">員工</option>
+                        <option value="viewer">會計（查看）</option>
+                    </select>
+                </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeUserModal()">取消</button>
+                <button class="btn btn-secondary" onclick="closeModal()">取消</button>
                 <button class="btn btn-primary" onclick="saveUser()">儲存</button>
             </div>
         </div>
     </div>
 
-    <script src="config.js?v=2"></script>
-    <script src="api.js?v=2"></script>
     <script>
-        // 檢查登入狀態
-        const currentUser = JSON.parse(localStorage.getItem('oneCurrentUser'));
-        if (!currentUser) {
-            window.location.href = 'index.html';
-        }
-
-        // 權限控制：只有主管可以管理員工
-        if (currentUser.role !== 'admin') {
-            alert('⚠️ 您沒有權限訪問此頁面\n\n此功能僅限主管使用。');
-            window.location.href = 'menu.html';
-        }
-
-        // 顯示使用者資訊
-        const roleNames = {
-            'admin': '主管',
-            'staff': '員工',
-            'viewer': '會計（查看）'
-        };
-        document.getElementById('userName').textContent = currentUser.avatar + ' ' + currentUser.name;
-        document.getElementById('userRole').textContent = roleNames[currentUser.role];
-
+        const API = 'https://script.google.com/macros/s/AKfycbz00HGH3_TaJ7CITqVg-R-qCfvYRBJEns-3IovcpGG9cbj1Kb5EuQ4QEDKfts0Rt4QC/exec';
+        const roleNames = { 'admin': '主管', 'staff': '員工', 'viewer': '會計' };
+        
         let users = [];
-        let editingUserId = null;
+        let editingId = null;
 
-        async function init() {
-            console.log('初始化：載入員工資料...');
-            await loadUsers();
-        }
-
+        // 載入員工列表
         async function loadUsers() {
             try {
-                console.log('🔄 從雲端讀取員工資料...');
-                const result = await API.getUsers();
+                const url = `${API}?action=getUsers&_t=${Date.now()}`;
+                const res = await fetch(url);
+                const data = await res.json();
                 
-                if (result.success) {
-                    users = result.users;
-                    console.log('✅ 載入成功:', users.length, '位員工');
-                    
-                    const usersBody = document.getElementById('usersBody');
-                    usersBody.innerHTML = users.map(user => `
+                if (data.success) {
+                    users = data.users;
+                    renderUsers();
+                }
+            } catch (error) {
+                alert('載入失敗：' + error.message);
+            }
+        }
+
+        // 顯示員工列表
+        function renderUsers() {
+            const tbody = document.getElementById('userList');
+            tbody.innerHTML = users.map(u => `
                 <tr>
-                    <td>${user.avatar}</td>
-                    <td>${user.name}</td>
-                    <td>${user.username}</td>
+                    <td>${u.name}</td>
+                    <td>${u.username}</td>
+                    <td><span class="status-badge">${roleNames[u.role]}</span></td>
                     <td>
-                        <span class="status-badge ${user.role === 'admin' ? 'status-signed' : user.role === 'staff' ? 'status-construction' : 'status-quoted'}">
-                            ${roleNames[user.role]}
-                        </span>
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-secondary" onclick="editUser('${user.id}')">編輯</button>
-                        ${user.id !== currentUser.id ? `<button class="btn btn-sm btn-danger" onclick="deleteUser('${user.id}')">刪除</button>` : ''}
+                        <button class="btn btn-sm btn-secondary" onclick="editUser('${u.id}')">編輯</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteUser('${u.id}')">刪除</button>
                     </td>
                 </tr>
             `).join('');
-                } else {
-                    alert('❌ 載入失敗：' + (result.error || '未知錯誤'));
-                }
-            } catch (error) {
-                console.error('載入員工資料失敗:', error);
-                alert('❌ 連線失敗：' + error.message);
-            }
         }
 
-        function openAddUserModal() {
-            editingUserId = null;
+        // 顯示新增對話框
+        function showAddModal() {
+            editingId = null;
             document.getElementById('modalTitle').textContent = '新增員工';
-            document.getElementById('userForm').reset();
-            document.getElementById('userPassword').required = true;
-            document.getElementById('userModal').classList.add('show');
+            document.getElementById('inputName').value = '';
+            document.getElementById('inputUsername').value = '';
+            document.getElementById('inputPassword').value = '';
+            document.getElementById('inputPassword').required = true;
+            document.getElementById('inputRole').value = 'staff';
+            document.getElementById('modal').classList.add('show');
         }
 
-        function editUser(userId) {
-            const user = users.find(u => u.id === userId);
-            if (!user) {
-                alert('找不到該員工！');
-                return;
-            }
-
-            console.log('編輯員工：', user);
+        // 編輯員工
+        function editUser(id) {
+            const user = users.find(u => u.id === id);
+            if (!user) return;
             
-            editingUserId = userId;
+            editingId = id;
             document.getElementById('modalTitle').textContent = '編輯員工';
-            document.getElementById('userAvatar').value = user.avatar;
-            document.getElementById('userFormName').value = user.name;
-            document.getElementById('userUsername').value = user.username;
-            document.getElementById('userPassword').value = '';
-            document.getElementById('userPassword').required = false;
-            document.getElementById('userRole').value = user.role;
-            
-            document.getElementById('userModal').classList.add('show');
+            document.getElementById('inputName').value = user.name;
+            document.getElementById('inputUsername').value = user.username;
+            document.getElementById('inputPassword').value = '';
+            document.getElementById('inputPassword').required = false;
+            document.getElementById('inputRole').value = user.role;
+            document.getElementById('modal').classList.add('show');
         }
 
-        function closeUserModal() {
-            document.getElementById('userForm').reset();
-            document.getElementById('userModal').classList.remove('show');
-            editingUserId = null;
+        // 關閉對話框
+        function closeModal() {
+            document.getElementById('modal').classList.remove('show');
+            editingId = null;
         }
 
+        // 儲存員工
         async function saveUser() {
-            const avatarEl = document.getElementById('userAvatar');
-            const nameEl = document.getElementById('userFormName');
-            const usernameEl = document.getElementById('userUsername');
-            const passwordEl = document.getElementById('userPassword');
-            const roleEl = document.getElementById('userRole');
-            
-            console.log('🔍 元素檢查：', {
-                avatarEl, nameEl, usernameEl, passwordEl, roleEl
-            });
-            
-            const avatar = avatarEl.value.trim();
-            const name = nameEl.value.trim();
-            const username = usernameEl.value.trim();
-            const password = passwordEl.value;
-            const role = roleEl.value;
-
-            console.log('準備儲存：', {avatar, name, username, role, password: password ? '***已設定***' : '(未變更)', editingUserId});
-            console.log('role 型別:', typeof role, '原始值:', role, 'roleEl.value:', roleEl.value);
+            const name = document.getElementById('inputName').value.trim();
+            const username = document.getElementById('inputUsername').value.trim();
+            const password = document.getElementById('inputPassword').value;
+            const role = document.getElementById('inputRole').value;
 
             if (!name || !username || !role) {
                 alert('請填寫所有必填欄位！');
                 return;
             }
 
-            if (!editingUserId && !password) {
+            if (!editingId && !password) {
                 alert('新增員工時密碼為必填！');
                 return;
             }
 
-            if (password && password.length < 6) {
-                alert('密碼至少需要 6 位數！');
-                return;
-            }
-
-            // 儲存到雲端（使用測試頁面驗證過的方法）
             try {
-                const API_ENDPOINT = 'https://script.google.com/macros/s/AKfycbz00HGH3_TaJ7CITqVg-R-qCfvYRBJEns-3IovcpGG9cbj1Kb5EuQ4QEDKfts0Rt4QC/exec';
-                let result;
+                const userData = JSON.stringify({ name, username, password, role });
+                let url;
                 
-                if (editingUserId) {
-                    // 編輯模式
-                    console.log('🔧 更新員工資料:', editingUserId);
-                    const userData = { avatar, name, username, password, role };
-                    const url = `${API_ENDPOINT}?action=updateUser&userId=${editingUserId}&user=${encodeURIComponent(JSON.stringify(userData))}&_t=${Date.now()}`;
-                    console.log('請求 URL:', url);
-                    
-                    const response = await fetch(url);
-                    result = await response.json();
+                if (editingId) {
+                    url = `${API}?action=updateUser&userId=${editingId}&user=${encodeURIComponent(userData)}&_t=${Date.now()}`;
                 } else {
-                    // 新增模式
-                    console.log('➕ 新增員工');
-                    const userData = { avatar, name, username, password, role };
-                    const url = `${API_ENDPOINT}?action=addUser&user=${encodeURIComponent(JSON.stringify(userData))}&_t=${Date.now()}`;
-                    console.log('請求 URL:', url);
-                    
-                    const response = await fetch(url);
-                    result = await response.json();
+                    url = `${API}?action=addUser&user=${encodeURIComponent(userData)}&_t=${Date.now()}`;
                 }
-                
-                console.log('API 回應:', result);
-                
-                if (result.success) {
-                    alert('✅ ' + result.message + '\n\n' + 
-                          `姓名：${name}\n` +
-                          `帳號：${username}\n` +
-                          `權限：${roleNames[role]}\n` +
-                          (password ? '✅ 密碼已設定' : '⚠️ 密碼未變更'));
-                    
-                    closeUserModal();
-                    
-                    // 等待2秒確保資料寫入完成
-                    setTimeout(async () => {
-                        await loadUsers();
-                    }, 2000);
-                    
-                    // 如果修改了當前用戶，重新載入頁面
-                    if (editingUserId === currentUser.id) {
-                        setTimeout(() => {
-                            alert('✅ 您的資料已更新，頁面即將重新載入');
-                            location.reload();
-                        }, 2500);
-                    }
-                } else {
-                    alert('❌ ' + (result.error || '儲存失敗'));
-                }
-            } catch (error) {
-                console.error('儲存失敗:', error);
-                alert('❌ 連線失敗：' + error.message);
-            }
-        }
 
-        async function deleteUser(userId) {
-            if (userId === currentUser.id) {
-                alert('無法刪除自己的帳號！');
-                return;
-            }
+                const res = await fetch(url);
+                const result = await res.json();
 
-            const user = users.find(u => u.id === userId);
-            if (!user) return;
-
-            if (!confirm(`確定要刪除員工「${user.name}」嗎？\n\n此操作無法復原！`)) {
-                return;
-            }
-
-            try {
-                console.log('🗑️ 刪除員工:', userId);
-                const result = await API.deleteUser(userId);
-                
                 if (result.success) {
                     alert('✅ ' + result.message);
-                    await loadUsers();
+                    closeModal();
+                    setTimeout(loadUsers, 2000); // 等2秒後重新載入
                 } else {
-                    alert('❌ ' + (result.error || '刪除失敗'));
+                    alert('❌ ' + result.error);
                 }
             } catch (error) {
-                console.error('刪除失敗:', error);
                 alert('❌ 連線失敗：' + error.message);
             }
         }
 
-        init();
+        // 刪除員工
+        async function deleteUser(id) {
+            const user = users.find(u => u.id === id);
+            if (!user || !confirm(`確定要刪除「${user.name}」嗎？`)) return;
+
+            try {
+                const url = `${API}?action=deleteUser&userId=${id}&_t=${Date.now()}`;
+                const res = await fetch(url);
+                const result = await res.json();
+
+                if (result.success) {
+                    alert('✅ ' + result.message);
+                    setTimeout(loadUsers, 2000);
+                } else {
+                    alert('❌ ' + result.error);
+                }
+            } catch (error) {
+                alert('❌ 連線失敗：' + error.message);
+            }
+        }
+
+        // 頁面載入時執行
+        loadUsers();
     </script>
 </body>
 </html>
