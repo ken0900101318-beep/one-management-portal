@@ -189,11 +189,15 @@
                 'staff': '員工',
                 'viewer': '會計（查看）'
             };
-            document.getElementById('currentRoleDisplay').textContent = roleNames[user.role] || user.role;
+            
+            const currentRoleDisplay = document.getElementById('currentRoleDisplay');
+            if (currentRoleDisplay) {
+                currentRoleDisplay.textContent = roleNames[user.role] || user.role;
+            }
             
             // 驗證下拉選單是否正確設定
-            console.log('當前權限下拉選單值:', document.getElementById('userRole').value);
-            console.log('下拉選單所有選項:', Array.from(document.getElementById('userRole').options).map(o => ({value: o.value, selected: o.selected})));
+            const roleSelect = document.getElementById('userRole');
+            console.log('當前權限下拉選單值:', roleSelect ? roleSelect.value : '找不到元素');
             
             document.getElementById('userModal').classList.add('show');
         }
