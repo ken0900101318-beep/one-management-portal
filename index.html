@@ -37,51 +37,47 @@
         </div>
     </div>
 
-    <script src="data.js"></script>
+    <script src="config.js"></script>
+    <script src="api.js"></script>
     <script>
         // 登入處理
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
+            const submitBtn = this.querySelector('button[type="submit"]');
             
-            // 從 localStorage 讀取使用者列表
-            const users = JSON.parse(localStorage.getItem('oneUsers') || '[]');
+            // 顯示載入中
+            submitBtn.disabled = true;
+            submitBtn.textContent = '登入中...';
             
-            // 除錯用：顯示當前使用者列表（可選）
-            console.log('系統使用者列表:', users.map(u => ({
-                username: u.username,
-                name: u.name,
-                role: u.role
-            })));
-            
-            // 尋找匹配的使用者
-            const user = users.find(u => 
-                u.username === username && u.password === password
-            );
-            
-            if (user) {
-                // 登入成功
-                console.log('登入成功:', user.name);
-                localStorage.setItem('oneCurrentUser', JSON.stringify(user));
+            try {
+                console.log('🔐 正在驗證登入...');
+                const result = await API.login(username, password);
                 
-                // 同步到報價系統
-                localStorage.setItem('currentUser', JSON.stringify(user));
+                console.log('登入結果:', result);
                 
-                window.location.href = 'menu.html';
-            } else {
-                // 登入失敗：檢查是帳號還是密碼錯誤
-                const userExists = users.find(u => u.username === username);
-                
-                if (!userExists) {
-                    alert('❌ 帳號不存在！\n\n請確認您的帳號是否正確。');
+                if (result.success) {
+                    // 登入成功
+                    console.log('✅ 登入成功:', result.user.name);
+                    localStorage.setItem('oneCurrentUser', JSON.stringify(result.user));
+                    
+                    // 同步到報價系統
+                    localStorage.setItem('currentUser', JSON.stringify(result.user));
+                    
+                    window.location.href = 'menu.html';
                 } else {
-                    alert('❌ 密碼錯誤！\n\n請確認您的密碼是否正確。\n如果忘記密碼，請聯絡主管重設。');
+                    alert('❌ ' + (result.error || '登入失敗，請重試'));
+                    document.getElementById('password').value = '';
+                    document.getElementById('password').focus();
                 }
-                
-                document.getElementById('password').value = '';
-                document.getElementById('password').focus();
+            } catch (error) {
+                console.error('登入錯誤:', error);
+                alert('❌ 連線失敗：' + error.message + '\n\n請檢查網路連線或聯絡系統管理員。');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '登入系統';
             }
         });
 
@@ -89,11 +85,6 @@
         const currentUser = localStorage.getItem('oneCurrentUser');
         if (currentUser) {
             window.location.href = 'menu.html';
-        }
-        
-        // 確保數據已初始化
-        if (typeof initializeData === 'function') {
-            initializeData();
         }
     </script>
 </body>

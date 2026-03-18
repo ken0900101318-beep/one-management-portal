@@ -10,11 +10,7 @@
  */
 
 const API_CONFIG = {
-    // ⚠️ 請替換為你的 Google Apps Script 部署網址
-    endpoint: '請填入 GAS 部署網址'
-    
-    // 範例：
-    // endpoint: 'https://script.google.com/macros/s/AKfycbxxx.../exec'
+    endpoint: 'https://script.google.com/macros/s/AKfycbz00HGH3_TaJ7CITqVg-R-qCfvYRBJEns-3IovcpGG9cbj1Kb5EuQ4QEDKfts0Rt4QC/exec'
 };
 
 // 檢查配置
