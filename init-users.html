@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>初始化員工帳號</title>
+</head>
+<body>
+    <h1>初始化員工帳號...</h1>
+    <div id="status"></div>
+
+    <script>
+        // 固定的員工資料
+        const users = [
+            {
+                id: 'USR-JIANYOU',
+                avatar: '👨‍💼',
+                name: '建佑',
+                username: '0920119696',
+                password: '789456',
+                role: 'admin'
+            },
+            {
+                id: 'USR-ACCOUNTING',
+                avatar: '💼',
+                name: '會計',
+                username: '0919759368',
+                password: '4920r035',
+                role: 'viewer'
+            },
+            {
+                id: 'USR-XIAOYUAN',
+                avatar: '👨',
+                name: '小圓',
+                username: '0966428064',
+                password: '666666',
+                role: 'admin'
+            },
+            {
+                id: 'USR-NICK',
+                avatar: '🧑',
+                name: '尼克',
+                username: 'willy5407',
+                password: '666666',
+                role: 'staff'
+            }
+        ];
+
+        // 清除舊資料並設定新資料
+        localStorage.setItem('oneUsers', JSON.stringify(users));
+        localStorage.setItem('users', JSON.stringify(users));
+
+        console.log('✅ 員工資料已初始化:', users);
+
+        document.getElementById('status').innerHTML = `
+            <h2>✅ 初始化完成！</h2>
+            <h3>員工列表：</h3>
+            <ul>
+                ${users.map(u => `
+                    <li>
+                        ${u.avatar} ${u.name} - 
+                        帳號: ${u.username} - 
+                        密碼: ${u.password} - 
+                        權限: ${u.role === 'admin' ? '主管' : u.role === 'staff' ? '員工' : '會計'}
+                    </li>
+                `).join('')}
+            </ul>
+            <p><strong>請關閉此頁面，前往登入頁面測試</strong></p>
+            <p><a href="index.html" style="font-size: 20px; color: blue;">→ 前往登入頁面</a></p>
+        `;
+
+        // 3秒後自動跳轉
+        setTimeout(() => {
+            if (confirm('初始化完成！要前往登入頁面嗎？')) {
+                window.location.href = 'index.html';
+            }
+        }, 3000);
+    </script>
+</body>
+</html>
