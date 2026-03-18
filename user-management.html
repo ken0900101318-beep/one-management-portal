@@ -209,11 +209,26 @@
         }
 
         function saveUser() {
+            const roleSelect = document.getElementById('userRole');
+            
+            // 強制檢查下拉選單
+            console.log('🔍 下拉選單檢查：');
+            console.log('  元素:', roleSelect);
+            console.log('  選中的選項 index:', roleSelect.selectedIndex);
+            console.log('  選中的選項:', roleSelect.options[roleSelect.selectedIndex]);
+            console.log('  選中的值:', roleSelect.value);
+            console.log('  所有選項:', Array.from(roleSelect.options).map((o, i) => ({
+                index: i,
+                value: o.value,
+                text: o.text,
+                selected: o.selected
+            })));
+            
             const avatar = document.getElementById('userAvatar').value.trim();
             const name = document.getElementById('userName').value.trim();
             const username = document.getElementById('userUsername').value.trim();
             const password = document.getElementById('userPassword').value;
-            const role = document.getElementById('userRole').value;
+            const role = roleSelect.value;
 
             console.log('準備儲存：', {
                 avatar, name, username, 
