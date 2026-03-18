@@ -9,9 +9,10 @@ const API = {
      */
     async request(action, data = {}) {
         try {
-            // 建立查詢參數
+            // 建立查詢參數（加入時間戳避免快取）
             const params = new URLSearchParams({
                 action: action,
+                _t: Date.now(), // 避免快取
                 ...this.flattenData(data)
             });
             
