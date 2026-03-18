@@ -46,15 +46,40 @@
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
             
+            // 從 localStorage 讀取使用者列表
             const users = JSON.parse(localStorage.getItem('oneUsers') || '[]');
-            const user = users.find(u => u.username === username && u.password === password);
+            
+            // 除錯用：顯示當前使用者列表（可選）
+            console.log('系統使用者列表:', users.map(u => ({
+                username: u.username,
+                name: u.name,
+                role: u.role
+            })));
+            
+            // 尋找匹配的使用者
+            const user = users.find(u => 
+                u.username === username && u.password === password
+            );
             
             if (user) {
                 // 登入成功
+                console.log('登入成功:', user.name);
                 localStorage.setItem('oneCurrentUser', JSON.stringify(user));
+                
+                // 同步到報價系統
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                
                 window.location.href = 'menu.html';
             } else {
-                alert('帳號或密碼錯誤，請重試');
+                // 登入失敗：檢查是帳號還是密碼錯誤
+                const userExists = users.find(u => u.username === username);
+                
+                if (!userExists) {
+                    alert('❌ 帳號不存在！\n\n請確認您的帳號是否正確。');
+                } else {
+                    alert('❌ 密碼錯誤！\n\n請確認您的密碼是否正確。\n如果忘記密碼，請聯絡主管重設。');
+                }
+                
                 document.getElementById('password').value = '';
                 document.getElementById('password').focus();
             }

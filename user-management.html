@@ -239,17 +239,31 @@
                 alert('✅ 員工已新增');
             }
 
+            // 儲存到 localStorage
             localStorage.setItem('oneUsers', JSON.stringify(users));
             
-            // 同步到報價系統
+            // 同步到報價系統（確保兩邊一致）
             localStorage.setItem('users', JSON.stringify(users));
+            
+            // 如果修改的是當前登入用戶，強制更新登入狀態
+            if (editingUserId === currentUser.id) {
+                const updatedUser = users.find(u => u.id === editingUserId);
+                if (updatedUser) {
+                    localStorage.setItem('oneCurrentUser', JSON.stringify(updatedUser));
+                    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+                }
+            }
             
             closeUserModal();
             loadUsers();
             
-            // 如果修改了當前用戶，重新載入頁面
-            if (editingUserId === currentUser.id) {
-                location.reload();
+            alert('✅ 儲存成功！新密碼已生效。');
+            
+            // 如果修改了當前用戶密碼，重新載入頁面
+            if (editingUserId === currentUser.id && password) {
+                setTimeout(() => {
+                    location.reload();
+                }, 500);
             }
         }
 
