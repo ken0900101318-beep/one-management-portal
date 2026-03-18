@@ -248,14 +248,22 @@ function handleUpdateUser(userId, user) {
   // 尋找要更新的列
   for (let i = 1; i < data.length; i++) {
     if (data[i][0] === userId) {
-      // 更新資料（保留 ID 和建立時間）
-      sheet.getRange(i + 1, 2).setValue(user.avatar);
-      sheet.getRange(i + 1, 3).setValue(user.name);
-      sheet.getRange(i + 1, 4).setValue(user.username);
+      // 更新資料（只更新有提供的欄位）
+      if (user.avatar !== undefined && user.avatar !== null) {
+        sheet.getRange(i + 1, 2).setValue(user.avatar);
+      }
+      if (user.name !== undefined && user.name !== null) {
+        sheet.getRange(i + 1, 3).setValue(user.name);
+      }
+      if (user.username !== undefined && user.username !== null) {
+        sheet.getRange(i + 1, 4).setValue(user.username);
+      }
       if (user.password) {
         sheet.getRange(i + 1, 5).setValue(user.password);
       }
-      sheet.getRange(i + 1, 6).setValue(user.role);
+      if (user.role !== undefined && user.role !== null) {
+        sheet.getRange(i + 1, 6).setValue(user.role);
+      }
       sheet.getRange(i + 1, 8).setValue(new Date()); // 更新時間
       
       return {
