@@ -262,25 +262,30 @@
                 const oldUser = JSON.parse(JSON.stringify(users[userIndex]));
                 
                 console.log('🔧 開始更新員工資料...');
-                console.log('  更新前的 role:', users[userIndex].role);
-                console.log('  新的 role 值:', role);
+                console.log('  更新前:', oldUser);
+                console.log('  新的值:', {avatar, name, username, role, password: password ? '***' : '(不變)'});
                 
-                // 更新員工資料
-                users[userIndex].avatar = avatar;
-                users[userIndex].name = name;
-                users[userIndex].username = username;
-                if (password) {
-                    users[userIndex].password = password;
-                }
-                users[userIndex].role = role;
+                // ⚠️ 使用完全替換的方式（而不是修改屬性）
+                const updatedUser = {
+                    id: users[userIndex].id,
+                    avatar: avatar,
+                    name: name,
+                    username: username,
+                    password: password || users[userIndex].password,
+                    role: role
+                };
                 
-                console.log('  更新後的 role:', users[userIndex].role);
-                console.log('  users[userIndex] 完整內容:', JSON.parse(JSON.stringify(users[userIndex])));
+                console.log('  建立的新物件:', updatedUser);
+                
+                // 替換陣列中的物件
+                users[userIndex] = updatedUser;
+                
+                console.log('  替換後的 users[userIndex]:', users[userIndex]);
 
                 // 詳細的修改紀錄
                 console.log('員工資料修改：', {
                     修改前: oldUser,
-                    修改後: JSON.parse(JSON.stringify(users[userIndex]))
+                    修改後: users[userIndex]
                 });
 
                 alert('✅ 員工資料已更新\n\n' + 
