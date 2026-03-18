@@ -54,7 +54,7 @@
                 <form id="userForm">
                     <div class="form-row">
                         <label>頭像 Emoji</label>
-                        <input type="text" id="userAvatar" required placeholder="例如：👨‍💼" maxlength="2">
+                        <input type="text" id="userAvatar" required placeholder="例如：👨‍💼" maxlength="10">
                     </div>
                     <div class="form-row">
                         <label>姓名 *</label>
@@ -227,23 +227,32 @@
                 return;
             }
 
-            // 儲存到雲端
+            // 儲存到雲端（使用測試頁面驗證過的方法）
             try {
+                const API_ENDPOINT = 'https://script.google.com/macros/s/AKfycbz00HGH3_TaJ7CITqVg-R-qCfvYRBJEns-3IovcpGG9cbj1Kb5EuQ4QEDKfts0Rt4QC/exec';
                 let result;
                 
                 if (editingUserId) {
                     // 編輯模式
                     console.log('🔧 更新員工資料:', editingUserId);
-                    result = await API.updateUser(editingUserId, {
-                        avatar, name, username, password, role
-                    });
+                    const userData = { avatar, name, username, password, role };
+                    const url = `${API_ENDPOINT}?action=updateUser&userId=${editingUserId}&user=${encodeURIComponent(JSON.stringify(userData))}&_t=${Date.now()}`;
+                    console.log('請求 URL:', url);
+                    
+                    const response = await fetch(url);
+                    result = await response.json();
                 } else {
                     // 新增模式
                     console.log('➕ 新增員工');
-                    result = await API.addUser({
-                        avatar, name, username, password, role
-                    });
+                    const userData = { avatar, name, username, password, role };
+                    const url = `${API_ENDPOINT}?action=addUser&user=${encodeURIComponent(JSON.stringify(userData))}&_t=${Date.now()}`;
+                    console.log('請求 URL:', url);
+                    
+                    const response = await fetch(url);
+                    result = await response.json();
                 }
+                
+                console.log('API 回應:', result);
                 
                 if (result.success) {
                     alert('✅ ' + result.message + '\n\n' + 
@@ -253,14 +262,18 @@
                           (password ? '✅ 密碼已設定' : '⚠️ 密碼未變更'));
                     
                     closeUserModal();
-                    await loadUsers();
+                    
+                    // 等待2秒確保資料寫入完成
+                    setTimeout(async () => {
+                        await loadUsers();
+                    }, 2000);
                     
                     // 如果修改了當前用戶，重新載入頁面
                     if (editingUserId === currentUser.id) {
                         setTimeout(() => {
                             alert('✅ 您的資料已更新，頁面即將重新載入');
                             location.reload();
-                        }, 500);
+                        }, 2500);
                     }
                 } else {
                     alert('❌ ' + (result.error || '儲存失敗'));
