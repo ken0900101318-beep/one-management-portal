@@ -71,12 +71,15 @@
                     </div>
                     <div class="form-row">
                         <label>權限 *</label>
-                        <select id="userRole" required>
+                        <select id="userRole" required onchange="console.log('權限已變更為:', this.value)">
                             <option value="">請選擇...</option>
                             <option value="admin">主管（可管理所有功能）</option>
                             <option value="staff">員工（可新增編輯專案）</option>
                             <option value="viewer">會計（僅查看）</option>
                         </select>
+                        <small style="color: #666; display: block; margin-top: 5px;">
+                            目前選擇：<span id="currentRoleDisplay">-</span>
+                        </small>
                     </div>
                 </form>
             </div>
@@ -180,8 +183,17 @@
             document.getElementById('userPassword').required = false;
             document.getElementById('userRole').value = user.role;
             
+            // 更新權限顯示
+            const roleNames = {
+                'admin': '主管',
+                'staff': '員工',
+                'viewer': '會計（查看）'
+            };
+            document.getElementById('currentRoleDisplay').textContent = roleNames[user.role] || user.role;
+            
             // 驗證下拉選單是否正確設定
             console.log('當前權限下拉選單值:', document.getElementById('userRole').value);
+            console.log('下拉選單所有選項:', Array.from(document.getElementById('userRole').options).map(o => ({value: o.value, selected: o.selected})));
             
             document.getElementById('userModal').classList.add('show');
         }
