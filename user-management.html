@@ -53,8 +53,8 @@
             <div class="modal-body">
                 <form id="userForm">
                     <div class="form-row">
-                        <label>頭像 Emoji</label>
-                        <input type="text" id="userAvatar" required placeholder="例如：👨‍💼" maxlength="10">
+                        <label>頭像 Emoji（選填）</label>
+                        <input type="text" id="userAvatar" placeholder="例如：👨‍💼" maxlength="10">
                     </div>
                     <div class="form-row">
                         <label>姓名 *</label>
@@ -212,7 +212,7 @@
             console.log('準備儲存：', {avatar, name, username, role, password: password ? '***已設定***' : '(未變更)', editingUserId});
             console.log('role 型別:', typeof role, '原始值:', role, 'roleEl.value:', roleEl.value);
 
-            if (!avatar || !name || !username || !role) {
+            if (!name || !username || !role) {
                 alert('請填寫所有必填欄位！');
                 return;
             }
