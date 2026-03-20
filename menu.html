@@ -55,6 +55,13 @@
                         <div class="system-status">✅ 運行中</div>
                     </div>
 
+                    <div class="system-card" onclick="openSystem('contractors')">
+                        <div class="system-icon">🧰</div>
+                        <h3>工程行管理</h3>
+                        <p>管理合作廠商、專長、聯絡方式與專案指派</p>
+                        <div class="system-status">✅ 運行中</div>
+                    </div>
+
                     <!-- 倉儲管理系統 -->
                     <div class="system-card" onclick="openSystem('warehouse')" style="opacity: 0.7;">
                         <div class="system-icon">📦</div>
@@ -203,6 +210,11 @@
                     localStorage.setItem('oneCurrentUser', JSON.stringify(currentUser));
                     localStorage.setItem('currentUser', JSON.stringify(currentUser));
                     window.location.href = '../one-quote-system/statistics.html?v=20260320e';
+                    break;
+                case 'contractors':
+                    localStorage.setItem('oneCurrentUser', JSON.stringify(currentUser));
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    window.location.href = '../one-quote-system/contractors.html?v=20260320f';
                     break;
                 case 'warehouse':
                     alert('倉儲管理系統建置中，敬請期待！');
