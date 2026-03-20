@@ -39,6 +39,14 @@
                         <div class="system-status">✅ 運行中</div>
                     </div>
 
+                    <!-- 價目表管理 -->
+                    <div class="system-card" onclick="openSystem('price-list')">
+                        <div class="system-icon">💰</div>
+                        <h3>價目表管理</h3>
+                        <p>管理固定分類價目、狀態與報價選用項目</p>
+                        <div class="system-status">✅ 運行中</div>
+                    </div>
+
                     <!-- 倉儲管理系統 -->
                     <div class="system-card" onclick="openSystem('warehouse')" style="opacity: 0.7;">
                         <div class="system-icon">📦</div>
@@ -176,7 +184,12 @@
                     // 設定報價系統的登入狀態（使用 oneCurrentUser，與 Auth.js 一致）
                     localStorage.setItem('oneCurrentUser', JSON.stringify(currentUser));
                     localStorage.setItem('currentUser', JSON.stringify(currentUser)); // 向下相容
-                    window.location.href = '../one-quote-system/dashboard-simple.html?v=20260320b';
+                    window.location.href = '../one-quote-system/dashboard-simple.html?v=20260320d';
+                    break;
+                case 'price-list':
+                    localStorage.setItem('oneCurrentUser', JSON.stringify(currentUser));
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    window.location.href = '../one-quote-system/price-list.html?v=20260320d';
                     break;
                 case 'warehouse':
                     alert('倉儲管理系統建置中，敬請期待！');
